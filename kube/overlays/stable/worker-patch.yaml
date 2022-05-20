@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airbyte-worker
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: airbyte-worker-container
+          env:
+            - name: MAX_SYNC_WORKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: MAX_SYNC_WORKERS

@@ -8,18 +8,25 @@ bases:
 
 images:
   - name: airbyte/db
-    newTag: 0.36.0-alpha
+    newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/airbyte/db
+    newTag: 0.36.6-alpha
   - name: airbyte/bootloader
-    newTag: 0.36.0-alpha
+    newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/airbyte/bootloader
+    newTag: 0.36.6-alpha
   - name: airbyte/scheduler
-    newTag: 0.36.0-alpha
+    newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/airbyte/scheduler
+    newTag: 0.36.6-alpha
   - name: airbyte/server
-    newTag: 0.36.0-alpha
+    newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/airbyte/server
+    newTag: 0.36.6-alpha
   - name: airbyte/webapp
-    newTag: 0.36.0-alpha
+    newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/airbyte/webapp
+    newTag: 0.36.6-alpha
   - name: airbyte/worker
-    newTag: 0.36.0-alpha
+    newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/airbyte/worker
+    newTag: 0.36.6-alpha
   - name: temporalio/auto-setup
+    newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/temporalio/auto-setup
     newTag: 1.7.0
 
 configMapGenerator:
@@ -31,3 +38,6 @@ secretGenerator:
   - name: airbyte-secrets
     envs:
       - .secrets
+
+patchesStrategicMerge:
+  - worker-patch.yaml
