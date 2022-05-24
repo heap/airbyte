@@ -187,6 +187,13 @@ Returns the Airbyte Scheduler Image
 {{- end -}}
 
 {{/*
+Returns the Airbyte metricsReporter Image
+*/}}
+{{- define "airbyte.metricsReporterImage" -}}
+{{- include "common.images.image" (dict "imageRoot" .Values.metricsReporter.image "global" .Values.global) -}}
+{{- end -}}
+
+{{/*
 Returns the Airbyte Server Image
 */}}
 {{- define "airbyte.serverImage" -}}
