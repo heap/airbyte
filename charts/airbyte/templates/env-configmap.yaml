@@ -21,13 +21,16 @@ data:
   GOOGLE_APPLICATION_CREDENTIALS: {{ include "airbyte.gcpLogCredentialsPath" . | quote }}
   INTERNAL_API_HOST: {{ include "common.names.fullname" . }}-server:{{ .Values.server.service.port }}
   IS_DEMO: {{ ternary "true" "false" .Values.webapp.isDemo | quote }}
-{{- if $.Values.jobs.kube.annotations }}
+{{- if .Values.jobs.kube.annotations }}
+  JOB_KUBE_SOCAT_IMAGE: {{ .Values.jobs.kube.socat.image }}:{{ .Values.jobs.kube.socat.tag }}
+  JOB_KUBE_BUSYBOX_IMAGE: {{ .Values.jobs.kube.busybox.image }}:{{ .Values.jobs.kube.busybox.tag }}
+  JOB_KUBE_CURL_IMAGE: {{ .Values.jobs.kube.curl.image }}:{{ .Values.jobs.kube.curl.tag }}
   JOB_KUBE_ANNOTATIONS: {{ $.Values.jobs.kube.annotations | include "airbyte.flattenMap" | quote }}
 {{- end }}
-{{- if $.Values.jobs.kube.nodeSelector }}
+{{- if .Values.jobs.kube.nodeSelector }}
   JOB_KUBE_NODE_SELECTORS: {{ $.Values.jobs.kube.nodeSelector | include "airbyte.flattenMap" | quote }}
 {{- end }}
-{{- if $.Values.jobs.kube.tolerations }}
+{{- if .Values.jobs.kube.tolerations }}
   JOB_KUBE_TOLERATIONS: {{ $.Values.jobs.kube.tolerations | include "airbyte.flattenArrayMap" | quote }}
 {{- end }}
   JOB_MAIN_CONTAINER_CPU_LIMIT: {{ ((.Values.jobs.resources | default dict).limits | default dict).cpu | default "" | quote }}
@@ -40,6 +43,14 @@ data:
   JOBS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION: "0.29.15.001"
   LOCAL_ROOT: /tmp/airbyte_local
   RUN_DATABASE_MIGRATION_ON_STARTUP: "true"
+  {{- if eq .Values.common.stateStorage.type "s3" }}
+  STATE_STORAGE_S3_REGION: {{ .Values.common.stateStorage.s3.region | quote }}
+  STATE_STORAGE_S3_BUCKET_NAME: {{ .Values.common.stateStorage.s3.bucket | quote }}
+  {{- end }}
+  {{- if eq .Values.common.stateStorage.type "minio" }}
+  STATE_STORAGE_MINIO_ENDPOINT: {{ .Values.common.stateStorage.minio.endpoint | quote }}
+  STATE_STORAGE_MINIO_BUCKET_NAME: {{ .Values.common.stateStorage.minio.bucket | quote }}
+  {{- end }}
   S3_LOG_BUCKET: {{ .Values.logs.s3.bucket | quote }}
   S3_LOG_BUCKET_REGION: {{ .Values.logs.s3.bucketRegion | quote }}
   S3_MINIO_ENDPOINT: {{ include "airbyte.minio.endpoint" . | quote }}
@@ -47,15 +58,39 @@ data:
   STATE_STORAGE_MINIO_BUCKET_NAME: airbyte-state-storage
   STATE_STORAGE_MINIO_ENDPOINT: {{ include "airbyte.minio.endpoint" . | quote }}
   TEMPORAL_HOST: {{ include "common.names.fullname" . }}-temporal:{{ .Values.temporal.service.port }}
-  TEMPORAL_WORKER_PORTS: 9001,9002,9003,9004,9005,9006,9007,9008,9009,9010,9011,9012,9013,9014,9015,9016,9017,9018,9019,9020,9021,9022,9023,9024,9025,9026,9027,9028,9029,9030,9031,9032,9033,9034,9035,9036,9037,9038,9039,9040
-  TRACKING_STRATEGY: segment
+  {{- if .Values.common.orchestrator.enabled }}
+  CONTAINER_ORCHESTRATOR_IMAGE: {{ include "airbyte.containerOrchestratorImage" . }}
+  {{- end}}
+  TRACKING_STRATEGY: logging
+  PAPERCUPS_STORYTIME: disabled
+  SENTRY_DSN: https://nonono.ingest.sentry.io/nonono
   WEBAPP_URL: http://{{ include "common.names.fullname" . }}-webapp:{{ .Values.webapp.service.port }}
   WORKER_ENVIRONMENT: kubernetes
   WORKSPACE_DOCKER_MOUNT: airbyte_workspace
   WORKSPACE_ROOT: /workspace
-  METRIC_CLIENT: ""
   OTEL_COLLECTOR_ENDPOINT: ""
   ACTIVITY_MAX_ATTEMPT: ""
   ACTIVITY_INITIAL_DELAY_BETWEEN_ATTEMPTS_SECONDS: ""
   ACTIVITY_MAX_DELAY_BETWEEN_ATTEMPTS_SECONDS: ""
   WORKFLOW_FAILURE_RESTART_DELAY_SECONDS: ""
+  CONTAINER_ORCHESTRATOR_ENABLED: {{ ternary "true" "false" .Values.common.orchestrator.enabled | default "true" | quote }}
+  TEMPORAL_WORKER_PORTS: {{ include "temporal.worker.ports" . | quote }}
+  {{- if .Values.datadog.enabled }}
+  METRIC_CLIENT: "datadog"
+  DD_AGENT_HOST: "/var/run/datadog/dsd.socket"
+  DD_DOGSTATSD_PORT: "0"
+  PUBLISH_METRICS: {{ ternary "true" "false" .Values.datadog.enabled | default "true" | quote }}
+  {{- end }}
+  MAX_SYNC_WORKERS: {{ .Values.worker.max.sync | quote }}
+  MAX_SPEC_WORKERS: {{ .Values.worker.max.spec | quote }}
+  MAX_CHECK_WORKERS: {{ .Values.worker.max.check | quote }}
+  MAX_DISCOVER_WORKERS: {{ .Values.worker.max.discover | quote }}
+  {{- if .Values.vault.enabled }}
+  SECRET_PERSISTENCE: "VAULT"
+  VAULT_ADDRESS: {{ .Values.vault.address | quote }}
+  VAULT_AUTH_TOKEN: {{ .Values.vault.token | quote }}
+  VAULT_PREFIX: {{ .Values.vault.prefix | quote }}
+  VAULT_AUTH_METHOD: {{ .Values.vault.authMethod | quote }}
+  {{- else }}
+  SECRET_PERSISTENCE: "TESTING_CONFIG_DB_TABLE"
+  {{- end }}
