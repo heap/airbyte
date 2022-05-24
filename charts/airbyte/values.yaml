@@ -6,6 +6,27 @@ global:
   imageRegistry: ""
 
 ## @section Common Parameters
+common:
+  orchestrator:
+    enabled: true
+    ## @param common.orchestrator.image.repository The repository to use for the airbyte container-orchestrator image.
+    ## @param common.orchestrator.image.tag The airbyte container-orchestrator image tag. Defaults to the chart's AppVersion
+    image:
+      repository: "airbyte/container-orchestrator"
+      tag: "0.39.9-alpha"
+  stateStorage:
+    type: "s3"
+    s3:
+      region: "us-east-1"
+      bucket: "terraform-state"
+      key: "key"
+      secret: "secret"
+    minio:
+      endpoint: "http://airbyte-minio-svc:9000"
+      bucket: "airbyte-dev-logs"
+      key: "minio"
+      secret: "minio123"
+
 
 ## @param nameOverride String to partially override airbyte.fullname template with a string (will prepend the release name)
 ##
@@ -197,6 +218,140 @@ webapp:
   ##
   extraVolumes: []
 
+## @param enable datadog or not
+datadog:
+  enabled: true
+  volumeMounts:
+    - name: dsdsocket
+      mountPath: /var/run/datadog
+  volumes:
+    - name: dsdsocket
+      hostPath:
+        path: /var/run/datadog/
+
+metricsReporter:
+  ## @param metricsReporter.replicaCount Number of metricsReporter replicas
+  replicaCount: 1
+
+  ## @param metricsReporter.image.repository The repository to use for the airbyte metricsReporter image.
+  ## @param metricsReporter.image.pullPolicy the pull policy to use for the airbyte metricsReporter image
+  ## @param metricsReporter.image.tag The airbyte metricsReporter image tag. Defaults to the chart's AppVersion
+  image:
+    repository: airbyte/metrics-reporter
+    pullPolicy: IfNotPresent
+    tag: 0.39.9-alpha
+
+  ## @param metricsReporter.podAnnotations [object] Add extra annotations to the metricsReporter pod
+  ##
+  podAnnotations: {}
+
+  ## @param metricsReporter.containerSecurityContext Security context for the container
+  ## Examples:
+  ## containerSecurityContext:
+  ##    runAsNonRoot: true
+  ##    runAsUser: 1000
+  ##    readOnlyRootFilesystem: true
+  containerSecurityContext: {}
+
+  ## Configure extra options for the metricsReporter containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param metricsReporter.livenessProbe.enabled Enable livenessProbe on the metricsReporter
+  ## @param metricsReporter.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param metricsReporter.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param metricsReporter.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param metricsReporter.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param metricsReporter.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 30
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+
+  ## @param metricsReporter.readinessProbe.enabled Enable readinessProbe on the metricsReporter
+  ## @param metricsReporter.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param metricsReporter.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param metricsReporter.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param metricsReporter.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param metricsReporter.readinessProbe.successThreshold Success threshold for readinessProbe
+  ##
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 30
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+
+  ## metricsReporter resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ## We usually recommend not to specify default resources and to leave this as a conscious
+  ## choice for the user. This also increases chances charts run on environments with little
+  ## resources, such as Minikube. If you do want to specify resources, uncomment the following
+  ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  ## @param metricsReporter.resources.limits [object] The resources limits for the metricsReporter container
+  ## @param metricsReporter.resources.requests [object] The requested resources for the metricsReporter container
+  resources:
+    ## Example:
+    ## limits:
+    ##    cpu: 200m
+    ##    memory: 1Gi
+    limits: {}
+    ## Examples:
+    ## requests:
+    ##    memory: 256Mi
+    ##    cpu: 250m
+    requests: {}
+
+  ## @param metricsReporter.nodeSelector [object] Node labels for pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## @param metricsReporter.tolerations [array] Tolerations for metricsReporter pod assignment.
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+
+  ## @param metricsReporter.affinity [object] Affinity and anti-affinity for metricsReporter pod assignment.
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+  ##
+  affinity: {}
+
+  ## @param metricsReporter.log.level The log level to log at.
+  log:
+    level: "INFO"
+
+  ## @param metricsReporter.extraEnv [array] Additional env vars for metricsReporter pod(s).
+  ## Example:
+  ##
+  ## extraEnv:
+  ## - name: SAMPLE_ENV_VAR
+  ##   value: "key=sample-value"
+  extraEnv: []
+
+  ## @param metricsReporter.extraVolumeMounts [array] Additional volumeMounts for metricsReporter container(s).
+  ## Examples:
+  ## extraVolumeMounts:
+  ##   - name: tmpdir
+  ##     mountPath: /tmp
+  ##   - mountPath: /workspace
+  ##     name: workspace
+  ##
+  extraVolumeMounts: []
+
+  ## @param metricsReporter.extraVolumes [array] Additional volumes for metricsReporter pod(s).
+  ## Examples:
+  ## extraVolumes:
+  ##   - name: tmpdir
+  ##     emptyDir: {}
+  ##   - name: workspace
+  ##     emptyDir: {}
+  ##
+  extraVolumes: []
+
 ## @section Scheduler Parameters
 
 scheduler:
@@ -210,6 +365,10 @@ scheduler:
     repository: airbyte/scheduler
     pullPolicy: IfNotPresent
     tag: 0.39.9-alpha
+
+  ## @param scheduler.submitterNumThreads Number number of threads to use for job submission
+  ## controls how many jobs can be submitted in parallel, deprecated after 0.39.0
+  submitterNumThreads: 100
 
   ## @param scheduler.podAnnotations [object] Add extra annotations to the scheduler pod
   ##
@@ -633,6 +792,11 @@ worker:
     ##    cpu: 250m
     requests: {}
 
+  max:
+    sync: 100
+    spec: 100
+    check: 100
+    discover: 100
   ## @param worker.nodeSelector [object] Node labels for pod assignment
   ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
@@ -646,7 +810,17 @@ worker:
   ## @param worker.affinity [object] Affinity and anti-affinity for worker pod assignment.
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
   ##
-  affinity: {}
+  affinity: 
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: airbyte
+            operator: In
+            values:
+            - worker
+            - scheduler
+        topologyKey: kubernetes.io/hostname
 
   ## @param worker.log.level The log level to log at.
   log:
@@ -785,6 +959,9 @@ temporal:
     timeoutSeconds: 1
     failureThreshold: 3
     successThreshold: 1
+  
+  worker:
+    ports: 9031,9032
 
   ## @param temporal.nodeSelector [object] Node labels for temporal pod assignment
   ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -893,7 +1070,7 @@ logs:
 
   ## @param logs.minio.enabled Switch to enable or disable the Minio helm chart
   minio:
-    enabled: true
+    enabled: false
 
   ## @param logs.externalMinio.enabled Switch to enable or disable an external Minio instance
   ## @param logs.externalMinio.host External Minio Host
@@ -973,3 +1150,13 @@ jobs:
     ##   value: "true"
     ##   effect: NoSchedule
     tolerations: []
+
+    socat:
+      image: alpine/socat
+      tag: 1.7.4.1-r1
+    busybox:
+      image: busybox
+      tag: 1.28
+    curl:
+      image: curlimages/curl
+      tag: 7.77.0
