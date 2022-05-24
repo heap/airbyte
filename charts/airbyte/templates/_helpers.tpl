@@ -30,6 +30,10 @@ Create chart name and version as used by the chart label.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
+{{- define "temporal.worker.ports" -}}
+{{seq 9031 12030 | replace " " ","}}
+{{- end -}}
+
 {{/*
 Common labels
 */}}
@@ -187,6 +191,13 @@ Returns the Airbyte Scheduler Image
 {{- end -}}
 
 {{/*
+Returns the Airbyte metricsReporter Image
+*/}}
+{{- define "airbyte.metricsReporterImage" -}}
+{{- include "common.images.image" (dict "imageRoot" .Values.metricsReporter.image "global" .Values.global) -}}
+{{- end -}}
+
+{{/*
 Returns the Airbyte Server Image
 */}}
 {{- define "airbyte.serverImage" -}}
@@ -226,6 +237,13 @@ Returns the Temporal Image. TODO: This will probably be replaced if we move to u
 */}}
 {{- define "airbyte.temporalImage" -}}
 {{- include "common.images.image" (dict "imageRoot" .Values.temporal.image "global" .Values.global) -}}
+{{- end -}}
+
+{{/*
+Returns the container orchestrator Image.
+*/}}
+{{- define "airbyte.containerOrchestratorImage" -}}
+{{- include "common.images.image" (dict "imageRoot" .Values.common.orchestrator.image "global" .Values.global) -}}
 {{- end -}}
 
 {{/*
