@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: airbyte-worker
 spec:
-  replicas: 3
+  replicas: 10
   template:
     spec:
       containers:
@@ -14,3 +14,215 @@ spec:
                 configMapKeyRef:
                   name: airbyte-env
                   key: MAX_SYNC_WORKERS
+            - name: DD_AGENT_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: DD_AGENT_HOST
+            - name: DD_DOGSTATSD_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: DD_DOGSTATSD_PORT
+            - name: PUBLISH_METRICS
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: PUBLISH_METRICS
+          volumeMounts:
+            - name: dsdsocket
+              mountPath: /var/run/datadog
+      volumes:
+        - name: dsdsocket
+          hostPath:
+            path: /var/run/datadog/
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airbyte-scheduler
+spec:
+  template:
+    spec:
+      containers:
+        - name: airbyte-scheduler-container
+          env:
+            - name: MAX_SYNC_WORKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: MAX_SYNC_WORKERS
+            - name: DD_AGENT_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: DD_AGENT_HOST
+            - name: DD_DOGSTATSD_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: DD_DOGSTATSD_PORT
+            - name: PUBLISH_METRICS
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: PUBLISH_METRICS
+          volumeMounts:
+            - name: dsdsocket
+              mountPath: /var/run/datadog
+      volumes:
+        - name: dsdsocket
+          hostPath:
+            path: /var/run/datadog/
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airbyte-server
+spec:
+  template:
+    spec:
+      containers:
+        - name: airbyte-server-container
+          env:
+            - name: MAX_SYNC_WORKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: MAX_SYNC_WORKERS
+            - name: DD_AGENT_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: DD_AGENT_HOST
+            - name: DD_DOGSTATSD_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: DD_DOGSTATSD_PORT
+            - name: PUBLISH_METRICS
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: PUBLISH_METRICS
+          volumeMounts:
+            - name: dsdsocket
+              mountPath: /var/run/datadog
+      volumes:
+        - name: dsdsocket
+          hostPath:
+            path: /var/run/datadog/
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airbyte-webapp
+spec:
+  template:
+    spec:
+      containers:
+        - name: airbyte-webapp-container
+          env:
+            - name: MAX_SYNC_WORKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: MAX_SYNC_WORKERS
+            - name: DD_AGENT_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: DD_AGENT_HOST
+            - name: DD_DOGSTATSD_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: DD_DOGSTATSD_PORT
+            - name: PUBLISH_METRICS
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: PUBLISH_METRICS
+          volumeMounts:
+            - name: dsdsocket
+              mountPath: /var/run/datadog
+      volumes:
+        - name: dsdsocket
+          hostPath:
+            path: /var/run/datadog/
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airbyte-pod-sweeper
+spec:
+  template:
+    spec:
+      containers:
+        - name: airbyte-pod-sweeper
+          env:
+            - name: MAX_SYNC_WORKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: MAX_SYNC_WORKERS
+            - name: DD_AGENT_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: DD_AGENT_HOST
+            - name: DD_DOGSTATSD_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: DD_DOGSTATSD_PORT
+            - name: PUBLISH_METRICS
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: PUBLISH_METRICS
+          volumeMounts:
+            - name: dsdsocket
+              mountPath: /var/run/datadog
+      volumes:
+        - name: dsdsocket
+          hostPath:
+            path: /var/run/datadog/
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airbyte-metrics
+spec:
+  template:
+    spec:
+      containers:
+        - name: airbyte-metrics-container
+          env:
+            - name: MAX_SYNC_WORKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: MAX_SYNC_WORKERS
+            - name: DD_AGENT_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: DD_AGENT_HOST
+            - name: DD_DOGSTATSD_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: DD_DOGSTATSD_PORT
+            - name: PUBLISH_METRICS
+              valueFrom:
+                configMapKeyRef:
+                  name: airbyte-env
+                  key: PUBLISH_METRICS
+          volumeMounts:
+            - name: dsdsocket
+              mountPath: /var/run/datadog
+      volumes:
+        - name: dsdsocket
+          hostPath:
+            path: /var/run/datadog/

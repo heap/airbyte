@@ -9,22 +9,25 @@ bases:
 images:
   - name: airbyte/db
     newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/airbyte/db
-    newTag: 0.36.6-alpha
+    newTag: 0.39.0-alpha
   - name: airbyte/bootloader
     newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/airbyte/bootloader
-    newTag: 0.36.6-alpha
+    newTag: 0.39.0-alpha
   - name: airbyte/scheduler
     newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/airbyte/scheduler
-    newTag: 0.36.6-alpha
+    newTag: 0.39.0-alpha
   - name: airbyte/server
     newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/airbyte/server
-    newTag: 0.36.6-alpha
+    newTag: 0.39.0-alpha
   - name: airbyte/webapp
     newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/airbyte/webapp
-    newTag: 0.36.6-alpha
+    newTag: 0.39.0-alpha
   - name: airbyte/worker
     newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/airbyte/worker
-    newTag: 0.36.6-alpha
+    newTag: 0.39.0-alpha
+  - name: airbyte/metrics-reporter
+    newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/airbyte/metrics-reporter
+    newTag: 0.39.0-alpha
   - name: temporalio/auto-setup
     newName: 329121830557.dkr.ecr.us-east-1.amazonaws.com/temporalio/auto-setup
     newTag: 1.7.0
