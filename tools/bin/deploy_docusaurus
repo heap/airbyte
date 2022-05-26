@@ -17,6 +17,17 @@ else
   exit 1
 fi
 
+# if a string
+if $(git remote get-url origin | grep --quiet "http"); then
+  set +o xtrace
+  echo -e "$red_text""This program requires a ssh-based github repo""$default_text"
+  echo -e "$red_text""https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account""$default_text"
+  echo -e "$red_text""You will need to change your remote to continue.  Yell @topher for help""$default_text"
+  echo -e "$red_text""change your remote command:""$default_text"
+  echo -e "$red_text""git remote set-url origin git@github.com:airbytehq/airbyte.git""$default_text"
+  exit 1
+fi
+
 
 # ------------- Start Main
 set +o xtrace
@@ -31,23 +42,28 @@ pwd
 
 
 # Yarn check (which is commonly used to check for program existance)
-if ! which yarn > /dev/null; then
-  echo -e "$red_text""yarn not found HALP!!\n\n""$default_text"
+# -s/--silent doesn't exist in cloud's Ubuntu
+if ! which brew > /dev/null; then
+  echo -e "$red_text""homebrew not found HALP!!\n\n""$default_text"
+  echo -e "$red_text""try this:  https://brew.sh\n\n""$default_text"
   exit 1
 fi
 
+if ! which yarn > /dev/null; then
+  echo -e "$red_text""yarn not found HALP!!\n\n""$default_text"
+  echo -e "$red_text""try this:  brew install yarn\n\n""$default_text"
+  exit 1
+fi
+
+
 set -o xtrace
 
-# touch is non-destructive and the cloud doesn't have this file
-touch $HOME/.gitconfig
-
-# Set email and user name
-if ! git config --list --global | grep --silent user.email; then
+# local check for changes.  Fail here early instead of 40 seconds from now
+if ! test -z "$(git status --short)"; then
   set +o xtrace
-  echo -e "$blue_text""github email not found adding Octavia's""$default_text"
-  set -o xtrace
-  git config --global user.email="octavia-squidington-iii@users.noreply.github.com"
-  git config --global user.name="octavia-squidington-iii"
+  echo -e "$red_text""You have uncommitted changes!!!\n\n""$default_text"
+  echo -e "$red_text""Commit and try again""$default_text"
+  exit 1
 fi
 
 cd docusaurus
@@ -59,9 +75,23 @@ yarn install
 # generate static content
 yarn build
 
-# context https://v1.docusaurus.io/docs/en/publishing#using-github-pages
-# write a prod website to airbytehq/airbyte gh_pages branch
-GIT_USER=octavia-squidington-iii yarn run deploy
+# Check tty for local/remote deploys (we expect cloud to be non-interactive)
+# results like /dev/ttys000 || not a tty
+if test "$(tty)" == "not a tty"; then
+  set +o xtrace
+  echo -e "$blue_text""github email not found adding Octavia's""$default_text"
+  set -o xtrace
+  git config user.email="octavia-squidington-iii@users.noreply.github.com"
+  git config user.name="octavia-squidington-iii"
+  echo "machine github.com login octavia-squidington-iii password $GITHUB_TOKEN" > $HOME/.netrc
+  # context https://v1.docusaurus.io/docs/en/publishing#using-github-pages
+  # write a prod website to airbytehq/airbyte gh_pages branch
+  # NOT ACTUALLY WORKING
+  GIT_USER="octavia-squidington-iii" yarn run publish-gh-pages
+else
+  yarn run deploy
+fi
+
 
 
 
@@ -71,8 +101,11 @@ pwd
 
 # We should be here but we are playing with fire
 git fetch
+# We force push gh-pages.  Local copies confuse things
+# This line uses || true to enure we don't error if that branch doesn't exist
+git branch -D gh-pages 2> /dev/null || true
 # checkout the branch tracking it's remote
-git switch gh-pages
+git switch --track origin/gh-pages
 
 # For tracking in the commit message
 revision=$(git rev-parse --short HEAD)
@@ -89,16 +122,24 @@ echo "docs.airbyte.com" > CNAME
 
 git add CNAME
 
-git commit --message "Adds CNAME to deploy for $revision"
+# Skip pre-commit hooks fire_elmo.jpg
+PRE_COMMIT_ALLOW_NO_CONFIG=1 git commit --message "Adds CNAME to deploy for $revision"
 
 # non functional. for debugging
-git branch
+git rev-parse --abbrev-ref HEAD
 
-# note that this is NOT airbyte repo
-git push --force https://$GITHUB_TOKEN@github.com/airbytehq/airbytehq.github.io.git
+if test "$(tty)" == "not a tty"; then
+  # note that this is NOT airbyte repo
+  git push --force https://octavia-squidington-iii:$GITHUB_TOKEN@github.com/airbytehq/airbytehq.github.io.git
+else
+  git push --force git@github.com:airbytehq/airbytehq.github.io.git
+fi
+
+# Let's leave the tire fire of force pushes
+git checkout -
+
 
 # Want to push from your own computer? uncomment this line and comment out the push above
-# git push --force https://git@github.com/airbytehq/airbytehq.github.io.git
 
 set +o xtrace
 echo -e "$blue_text""Script exiting 0 GREAT SUCCESS!!!?""$default_text"

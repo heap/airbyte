@@ -1,19 +1,19 @@
 /*
- * Copyright (c) 2021 Airbyte, Inc., all rights reserved.
+ * Copyright (c) 2022 Airbyte, Inc., all rights reserved.
  */
 
 package io.airbyte.config.persistence;
 
-import static io.airbyte.db.instance.configs.jooq.Tables.ACTOR;
-import static io.airbyte.db.instance.configs.jooq.Tables.ACTOR_CATALOG;
-import static io.airbyte.db.instance.configs.jooq.Tables.ACTOR_CATALOG_FETCH_EVENT;
-import static io.airbyte.db.instance.configs.jooq.Tables.ACTOR_DEFINITION;
-import static io.airbyte.db.instance.configs.jooq.Tables.ACTOR_DEFINITION_WORKSPACE_GRANT;
-import static io.airbyte.db.instance.configs.jooq.Tables.ACTOR_OAUTH_PARAMETER;
-import static io.airbyte.db.instance.configs.jooq.Tables.CONNECTION;
-import static io.airbyte.db.instance.configs.jooq.Tables.CONNECTION_OPERATION;
-import static io.airbyte.db.instance.configs.jooq.Tables.OPERATION;
-import static io.airbyte.db.instance.configs.jooq.Tables.WORKSPACE;
+import static io.airbyte.db.instance.configs.jooq.generated.Tables.ACTOR;
+import static io.airbyte.db.instance.configs.jooq.generated.Tables.ACTOR_CATALOG;
+import static io.airbyte.db.instance.configs.jooq.generated.Tables.ACTOR_CATALOG_FETCH_EVENT;
+import static io.airbyte.db.instance.configs.jooq.generated.Tables.ACTOR_DEFINITION;
+import static io.airbyte.db.instance.configs.jooq.generated.Tables.ACTOR_DEFINITION_WORKSPACE_GRANT;
+import static io.airbyte.db.instance.configs.jooq.generated.Tables.ACTOR_OAUTH_PARAMETER;
+import static io.airbyte.db.instance.configs.jooq.generated.Tables.CONNECTION;
+import static io.airbyte.db.instance.configs.jooq.generated.Tables.CONNECTION_OPERATION;
+import static io.airbyte.db.instance.configs.jooq.generated.Tables.OPERATION;
+import static io.airbyte.db.instance.configs.jooq.generated.Tables.WORKSPACE;
 import static org.jooq.impl.DSL.asterisk;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -37,11 +37,12 @@ import io.airbyte.config.StandardSyncOperation;
 import io.airbyte.config.StandardSyncState;
 import io.airbyte.config.StandardWorkspace;
 import io.airbyte.config.State;
+import io.airbyte.config.WorkspaceServiceAccount;
 import io.airbyte.db.Database;
 import io.airbyte.db.ExceptionWrappingDatabase;
-import io.airbyte.db.instance.configs.jooq.enums.ActorType;
-import io.airbyte.db.instance.configs.jooq.enums.ReleaseStage;
-import io.airbyte.db.instance.configs.jooq.enums.StatusType;
+import io.airbyte.db.instance.configs.jooq.generated.enums.ActorType;
+import io.airbyte.db.instance.configs.jooq.generated.enums.ReleaseStage;
+import io.airbyte.db.instance.configs.jooq.generated.enums.StatusType;
 import io.airbyte.metrics.lib.MetricQueries;
 import io.airbyte.protocol.models.AirbyteCatalog;
 import io.airbyte.validation.json.JsonValidationException;
@@ -72,6 +73,7 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes", "PMD.CyclomaticComplexity", "PMD.AvoidLiteralsInIfCondition"})
 public class ConfigRepository {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ConfigRepository.class);
@@ -81,7 +83,7 @@ public class ConfigRepository {
 
   public ConfigRepository(final ConfigPersistence persistence, final Database database) {
     this.persistence = persistence;
-    this.database = new ExceptionWrappingDatabase(database);;
+    this.database = new ExceptionWrappingDatabase(database);
   }
 
   /**
@@ -649,8 +651,8 @@ public class ConfigRepository {
   }
 
   /**
-   * Updates {@link io.airbyte.db.instance.configs.jooq.tables.ConnectionOperation} records for the
-   * given {@code connectionId}.
+   * Updates {@link io.airbyte.db.instance.configs.jooq.generated.tables.ConnectionOperation} records
+   * for the given {@code connectionId}.
    *
    * @param connectionId ID of the associated connection to update operations for
    * @param newOperationIds Set of all operationIds that should be associated to the connection
@@ -697,9 +699,9 @@ public class ConfigRepository {
     });
   }
 
-  public SourceOAuthParameter getSourceOAuthParams(final UUID SourceOAuthParameterId)
+  public SourceOAuthParameter getSourceOAuthParams(final UUID sourceOAuthParameterId)
       throws JsonValidationException, IOException, ConfigNotFoundException {
-    return persistence.getConfig(ConfigSchema.SOURCE_OAUTH_PARAM, SourceOAuthParameterId.toString(), SourceOAuthParameter.class);
+    return persistence.getConfig(ConfigSchema.SOURCE_OAUTH_PARAM, sourceOAuthParameterId.toString(), SourceOAuthParameter.class);
   }
 
   public Optional<SourceOAuthParameter> getSourceOAuthParamByDefinitionIdOptional(final UUID workspaceId, final UUID sourceDefinitionId)
@@ -717,8 +719,8 @@ public class ConfigRepository {
     return Optional.of(DbConverter.buildSourceOAuthParameter(result.get(0)));
   }
 
-  public void writeSourceOAuthParam(final SourceOAuthParameter SourceOAuthParameter) throws JsonValidationException, IOException {
-    persistence.writeConfig(ConfigSchema.SOURCE_OAUTH_PARAM, SourceOAuthParameter.getOauthParameterId().toString(), SourceOAuthParameter);
+  public void writeSourceOAuthParam(final SourceOAuthParameter sourceOAuthParameter) throws JsonValidationException, IOException {
+    persistence.writeConfig(ConfigSchema.SOURCE_OAUTH_PARAM, sourceOAuthParameter.getOauthParameterId().toString(), sourceOAuthParameter);
   }
 
   public List<SourceOAuthParameter> listSourceOAuthParam() throws JsonValidationException, IOException {
@@ -791,6 +793,16 @@ public class ConfigRepository {
       result.put(record.get(ACTOR_CATALOG.ID), catalog);
     }
     return result;
+  }
+
+  public ActorCatalog getActorCatalogById(final UUID actorCatalogId)
+      throws IOException, ConfigNotFoundException {
+    final Result<Record> result = database.query(ctx -> ctx.select(ACTOR_CATALOG.asterisk())
+        .from(ACTOR_CATALOG).where(ACTOR_CATALOG.ID.eq(actorCatalogId))).fetch();
+    if (result.size() > 0) {
+      return DbConverter.buildActorCatalog(result.get(0));
+    }
+    throw new ConfigNotFoundException(ConfigSchema.ACTOR_CATALOG, actorCatalogId);
   }
 
   /**
@@ -870,9 +882,9 @@ public class ConfigRepository {
       throws IOException {
     final OffsetDateTime timestamp = OffsetDateTime.now();
     final UUID fetchEventID = UUID.randomUUID();
-    database.transaction(ctx -> {
+    return database.transaction(ctx -> {
       final UUID catalogId = getOrInsertActorCatalog(catalog, ctx);
-      return ctx.insertInto(ACTOR_CATALOG_FETCH_EVENT)
+      ctx.insertInto(ACTOR_CATALOG_FETCH_EVENT)
           .set(ACTOR_CATALOG_FETCH_EVENT.ID, fetchEventID)
           .set(ACTOR_CATALOG_FETCH_EVENT.ACTOR_ID, actorId)
           .set(ACTOR_CATALOG_FETCH_EVENT.ACTOR_CATALOG_ID, catalogId)
@@ -880,9 +892,8 @@ public class ConfigRepository {
           .set(ACTOR_CATALOG_FETCH_EVENT.ACTOR_VERSION, connectorVersion)
           .set(ACTOR_CATALOG_FETCH_EVENT.MODIFIED_AT, timestamp)
           .set(ACTOR_CATALOG_FETCH_EVENT.CREATED_AT, timestamp).execute();
+      return catalogId;
     });
-
-    return fetchEventID;
   }
 
   public int countConnectionsForWorkspace(final UUID workspaceId) throws IOException {
@@ -969,6 +980,17 @@ public class ConfigRepository {
     } else {
       return tombstoneField.eq(false);
     }
+  }
+
+  public WorkspaceServiceAccount getWorkspaceServiceAccountNoSecrets(final UUID workspaceId)
+      throws JsonValidationException, IOException, ConfigNotFoundException {
+    return persistence.getConfig(ConfigSchema.WORKSPACE_SERVICE_ACCOUNT, workspaceId.toString(), WorkspaceServiceAccount.class);
+  }
+
+  public void writeWorkspaceServiceAccountNoSecrets(final WorkspaceServiceAccount workspaceServiceAccount)
+      throws JsonValidationException, IOException {
+    persistence.writeConfig(ConfigSchema.WORKSPACE_SERVICE_ACCOUNT, workspaceServiceAccount.getWorkspaceId().toString(),
+        workspaceServiceAccount);
   }
 
 }
