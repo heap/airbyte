@@ -74,6 +74,16 @@ spec:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: TRACKING_STRATEGY
+        - name: SENTRY_DSN
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: SENTRY_DSN
+        - name: PAPERCUPS_STORYTIME
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: PAPERCUPS_STORYTIME
         - name: WORKSPACE_DOCKER_MOUNT
           value: workspace
         - name: WORKSPACE_ROOT
@@ -101,11 +111,18 @@ spec:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: TEMPORAL_HOST
+        {{- if not .Values.common.orchestrator.enabled }}
         - name: TEMPORAL_WORKER_PORTS
           valueFrom:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: TEMPORAL_WORKER_PORTS
+        - name: SUBMITTER_NUM_THREADS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: SUBMITTER_NUM_THREADS
+        {{- end }}
         - name: LOG_LEVEL
           value: "{{ .Values.worker.log.level }}"
         - name: JOB_KUBE_NAMESPACE
@@ -133,11 +150,6 @@ spec:
               name: airbyte-env
               key: JOB_KUBE_TOLERATIONS
         {{- end }}
-        - name: SUBMITTER_NUM_THREADS
-          valueFrom:
-            configMapKeyRef:
-              name: {{ include "common.names.fullname" . }}-env
-              key: SUBMITTER_NUM_THREADS
         - name: JOB_MAIN_CONTAINER_CPU_REQUEST
           valueFrom:
             configMapKeyRef:
@@ -214,6 +226,12 @@ spec:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: GCS_LOG_BUCKET
+        {{- if eq $.Values.common.stateStorage.type "minio" }}
+        - name: STATE_STORAGE_MINIO_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: STATE_STORAGE_MINIO_ENDPOINT
         - name: STATE_STORAGE_MINIO_BUCKET_NAME
           valueFrom:
             configMapKeyRef:
@@ -229,16 +247,86 @@ spec:
             secretKeyRef:
               name: {{ include "common.names.fullname" . }}-secrets
               key: STATE_STORAGE_MINIO_SECRET_ACCESS_KEY
-        - name: STATE_STORAGE_MINIO_ENDPOINT
+        {{- end}}
+        {{- if eq $.Values.common.stateStorage.type "s3" }}
+        - name: STATE_STORAGE_S3_REGION
           valueFrom:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
-              key: STATE_STORAGE_MINIO_ENDPOINT
+              key: STATE_STORAGE_S3_REGION
+        - name: STATE_STORAGE_S3_BUCKET_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: STATE_STORAGE_S3_BUCKET_NAME
+        - name: STATE_STORAGE_S3_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "common.names.fullname" . }}-secrets
+              key: STATE_STORAGE_S3_ACCESS_KEY
+        - name: STATE_STORAGE_S3_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "common.names.fullname" . }}-secrets
+              key: STATE_STORAGE_S3_SECRET_ACCESS_KEY
+        {{- end}}
+        {{- if .Values.datadog.enabled }}
+        - name: DD_AGENT_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: DD_AGENT_HOST
+        - name: DD_DOGSTATSD_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: DD_DOGSTATSD_PORT
+        - name: PUBLISH_METRICS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: PUBLISH_METRICS
+        {{- end }}
         - name: INTERNAL_API_HOST
           valueFrom:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: INTERNAL_API_HOST
+        - name: CONFIGS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: CONFIGS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION
+        - name: JOBS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: JOBS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION
+        - name: CONTAINER_ORCHESTRATOR_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: CONTAINER_ORCHESTRATOR_ENABLED
+        - name: MAX_SYNC_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: MAX_SYNC_WORKERS
+        - name: MAX_SPEC_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: MAX_SPEC_WORKERS
+        - name: MAX_CHECK_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: MAX_CHECK_WORKERS
+        - name: MAX_DISCOVER_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: MAX_DISCOVER_WORKERS
         {{- if .Values.worker.extraEnv }}
         {{ .Values.worker.extraEnv | toYaml | nindent 8 }}
         {{- end }}
@@ -304,16 +392,11 @@ spec:
         securityContext: {{- toYaml .Values.worker.containerSecurityContext | nindent 10 }}
         {{- end }}
         volumeMounts:
-        - name: gcs-log-creds-volume
-          mountPath: /secrets/gcs-log-creds
-          readOnly: true
         {{- if .Values.worker.extraVolumeMounts }}
 {{ toYaml .Values.worker.extraVolumeMounts | nindent 8 }}
         {{- end }}
       volumes:
-      - name: gcs-log-creds-volume
-        secret:
-          secretName: {{ include "common.names.fullname" . }}-gcs-log-creds
       {{- if .Values.worker.extraVolumes }}
 {{ toYaml .Values.worker.extraVolumes | nindent 6 }}
       {{- end }}
+        

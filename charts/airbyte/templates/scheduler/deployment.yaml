@@ -74,6 +74,16 @@ spec:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: TRACKING_STRATEGY
+        - name: SENTRY_DSN
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: SENTRY_DSN
+        - name: PAPERCUPS_STORYTIME
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: PAPERCUPS_STORYTIME
         - name: WORKSPACE_DOCKER_MOUNT
           value: workspace
         - name: WORKSPACE_ROOT
@@ -101,22 +111,24 @@ spec:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: TEMPORAL_HOST
+        {{- if not .Values.common.orchestrator.enabled }}
         - name: TEMPORAL_WORKER_PORTS
           valueFrom:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: TEMPORAL_WORKER_PORTS
+        - name: SUBMITTER_NUM_THREADS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: SUBMITTER_NUM_THREADS
+        {{- end}}
         - name: LOG_LEVEL
           value: "{{ .Values.scheduler.log.level }}"
         - name: JOB_KUBE_NAMESPACE
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        - name: SUBMITTER_NUM_THREADS
-          valueFrom:
-            configMapKeyRef:
-              name: {{ include "common.names.fullname" . }}-env
-              key: SUBMITTER_NUM_THREADS
         - name: JOB_MAIN_CONTAINER_CPU_REQUEST
           valueFrom:
             configMapKeyRef:
@@ -193,11 +205,53 @@ spec:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: GCS_LOG_BUCKET
+        {{- if .Values.datadog.enabled }}
+        - name: DD_AGENT_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: DD_AGENT_HOST
+        - name: DD_DOGSTATSD_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: DD_DOGSTATSD_PORT
+        - name: PUBLISH_METRICS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: PUBLISH_METRICS
+        {{- end }}
         - name: INTERNAL_API_HOST
           valueFrom:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: INTERNAL_API_HOST
+        - name: CONTAINER_ORCHESTRATOR_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: CONTAINER_ORCHESTRATOR_ENABLED
+        - name: MAX_SYNC_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: MAX_SYNC_WORKERS
+        - name: MAX_SPEC_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: MAX_SPEC_WORKERS
+        - name: MAX_CHECK_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: MAX_CHECK_WORKERS
+        - name: MAX_DISCOVER_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: MAX_DISCOVER_WORKERS
         {{- if .Values.scheduler.extraEnv }}
         {{ .Values.scheduler.extraEnv | toYaml | nindent 8 }}
         {{- end }}
@@ -234,16 +288,10 @@ spec:
           failureThreshold: {{ .Values.scheduler.readinessProbe.failureThreshold }}
         {{- end }}
         volumeMounts:
-        - name: gcs-log-creds-volume
-          mountPath: /secrets/gcs-log-creds
-          readOnly: true
         {{- if .Values.scheduler.extraVolumeMounts }}
   {{ toYaml .Values.scheduler.extraVolumeMounts | nindent 8 }}
         {{- end }}
       volumes:
-      - name: gcs-log-creds-volume
-        secret:
-          secretName: {{ include "common.names.fullname" . }}-gcs-log-creds
       {{- if .Values.scheduler.extraVolumes }}
 {{ toYaml .Values.scheduler.extraVolumes | nindent 6 }}
       {{- end }}
