@@ -6,6 +6,22 @@ global:
   imageRegistry: ""
 
 ## @section Common Parameters
+common:
+  orchestrator:
+    enabled: false
+  stateStorage:
+    type: "s3"
+    s3:
+      region: "us-east-1"
+      bucket: "terraform-state"
+      key: "key"
+      secret: "secret"
+    minio:
+      endpoint: "http://airbyte-minio-svc:9000"
+      bucket: "airbyte-dev-logs"
+      key: "minio"
+      secret: "minio123"
+
 
 ## @param nameOverride String to partially override airbyte.fullname template with a string (will prepend the release name)
 ##
@@ -41,7 +57,7 @@ webapp:
   image:
     repository: airbyte/webapp
     pullPolicy: IfNotPresent
-    tag: 0.39.9-alpha
+    tag: 0.39.0-alpha
 
   ## @param webapp.podAnnotations [object] Add extra annotations to the webapp pod(s)
   ##
@@ -197,6 +213,17 @@ webapp:
   ##
   extraVolumes: []
 
+## @param enable datadog or not
+datadog:
+  enabled: true
+  volumeMounts:
+    - name: dsdsocket
+      mountPath: /var/run/datadog
+  volumes:
+    - name: dsdsocket
+      hostPath:
+        path: /var/run/datadog/
+
 metricsReporter:
   ## @param metricsReporter.replicaCount Number of metricsReporter replicas
   replicaCount: 1
@@ -332,10 +359,10 @@ scheduler:
   image:
     repository: airbyte/scheduler
     pullPolicy: IfNotPresent
-    tag: 0.39.9-alpha
+    tag: 0.39.0-alpha
 
   ## @param scheduler.submitterNumThreads Number number of threads to use for job submission
-  ## controls how many jobs can be submitted in parallel
+  ## controls how many jobs can be submitted in parallel, deprecated after 0.39.0
   submitterNumThreads: 100
 
   ## @param scheduler.podAnnotations [object] Add extra annotations to the scheduler pod
@@ -567,7 +594,7 @@ server:
   image:
     repository: airbyte/server
     pullPolicy: IfNotPresent
-    tag: 0.39.9-alpha
+    tag: 0.39.0-alpha
 
   ## @param server.podAnnotations [object] Add extra annotations to the server pod
   ##
@@ -694,7 +721,7 @@ worker:
   image:
     repository: airbyte/worker
     pullPolicy: IfNotPresent
-    tag: 0.39.9-alpha
+    tag: 0.39.0-alpha
 
   ## @param worker.podAnnotations [object] Add extra annotations to the worker pod(s)
   ##
@@ -760,6 +787,11 @@ worker:
     ##    cpu: 250m
     requests: {}
 
+  max:
+    sync: 100
+    spec: 100
+    check: 100
+    discover: 100
   ## @param worker.nodeSelector [object] Node labels for pod assignment
   ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
@@ -773,7 +805,17 @@ worker:
   ## @param worker.affinity [object] Affinity and anti-affinity for worker pod assignment.
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
   ##
-  affinity: {}
+  affinity: 
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: airbyte
+            operator: In
+            values:
+            - worker
+            - scheduler
+        topologyKey: kubernetes.io/hostname
 
   ## @param worker.log.level The log level to log at.
   log:
@@ -812,7 +854,7 @@ bootloader:
   image:
     repository: airbyte/bootloader
     pullPolicy: IfNotPresent
-    tag: 0.39.9-alpha
+    tag: 0.39.0-alpha
 
   ## @param bootloader.podAnnotations [object] Add extra annotations to the bootloader pod
   ##
@@ -912,6 +954,9 @@ temporal:
     timeoutSeconds: 1
     failureThreshold: 3
     successThreshold: 1
+  
+  worker:
+    ports: 9031,9032
 
   ## @param temporal.nodeSelector [object] Node labels for temporal pod assignment
   ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -1020,7 +1065,7 @@ logs:
 
   ## @param logs.minio.enabled Switch to enable or disable the Minio helm chart
   minio:
-    enabled: true
+    enabled: false
 
   ## @param logs.externalMinio.enabled Switch to enable or disable an external Minio instance
   ## @param logs.externalMinio.host External Minio Host

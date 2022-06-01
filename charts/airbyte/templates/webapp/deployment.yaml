@@ -48,6 +48,16 @@ spec:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: TRACKING_STRATEGY
+        - name: SENTRY_DSN
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: SENTRY_DSN
+        - name: PAPERCUPS_STORYTIME
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: PAPERCUPS_STORYTIME
         - name: FULLSTORY
           valueFrom:
             configMapKeyRef:
@@ -58,11 +68,53 @@ spec:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: IS_DEMO
+        {{- if .Values.datadog.enabled }}
+        - name: DD_AGENT_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: DD_AGENT_HOST
+        - name: DD_DOGSTATSD_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: DD_DOGSTATSD_PORT
+        - name: PUBLISH_METRICS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: PUBLISH_METRICS
+        {{- end }}
         - name: INTERNAL_API_HOST
           valueFrom:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: INTERNAL_API_HOST
+        - name: CONTAINER_ORCHESTRATOR_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: CONTAINER_ORCHESTRATOR_ENABLED
+        - name: MAX_SYNC_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: MAX_SYNC_WORKERS
+        - name: MAX_SPEC_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: MAX_SPEC_WORKERS
+        - name: MAX_CHECK_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: MAX_CHECK_WORKERS
+        - name: MAX_DISCOVER_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: MAX_DISCOVER_WORKERS
         {{- if .Values.webapp.extraEnv }}
         {{ .Values.webapp.extraEnv | toYaml | nindent 8 }}
         {{- end }}
