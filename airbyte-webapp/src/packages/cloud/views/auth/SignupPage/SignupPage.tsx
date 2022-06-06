@@ -37,7 +37,7 @@ const SignupPageValidationSchema = yup.object().shape({
 });
 
 const SignupPage: React.FC = () => {
-  const formatMessage = useIntl().formatMessage;
+  const { formatMessage } = useIntl();
   const config = useConfig();
 
   const { signUp } = useAuthService();

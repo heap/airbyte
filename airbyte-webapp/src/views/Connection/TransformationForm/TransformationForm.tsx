@@ -85,7 +85,7 @@ const TransformationForm: React.FC<TransformationProps> = ({
   onDone,
   isNewTransformation,
 }) => {
-  const formatMessage = useIntl().formatMessage;
+  const { formatMessage } = useIntl();
   const operationService = useGetService<OperationService>("OperationService");
 
   const formik = useFormik({

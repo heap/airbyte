@@ -129,7 +129,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({
   const { clearFormChange } = useFormChangeTrackerService();
   const formId = useUniqueFormId();
   const [submitError, setSubmitError] = useState<Error | null>(null);
-  const formatMessage = useIntl().formatMessage;
+  const { formatMessage } = useIntl();
 
   const isEditMode: boolean = mode !== "create";
   const initialValues = useInitialValues(connection, destDefinition, isEditMode);

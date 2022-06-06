@@ -19,10 +19,10 @@ const SectionTitle = styled.div`
 export const OperationsSection: React.FC<{
   destDefinition: DestinationDefinitionSpecificationRead;
 }> = ({ destDefinition }) => {
-  const formatMessage = useIntl().formatMessage;
+  const { formatMessage } = useIntl();
   const { hasFeature } = useFeatureService();
 
-  const supportsNormalization = destDefinition.supportsNormalization;
+  const { supportsNormalization } = destDefinition;
   const supportsTransformations = destDefinition.supportsDbt && hasFeature(FeatureItem.AllowCustomDBT);
 
   const defaultTransformation = useDefaultTransformation();
