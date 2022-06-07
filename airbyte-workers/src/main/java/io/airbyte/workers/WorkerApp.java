@@ -146,7 +146,7 @@ public class WorkerApp {
           }
         });
 
-    final WorkerFactory factory = TemporalClient.productionWorkerFactory(configs);
+    final WorkerFactory factory = TemporalClient.getWorkerFactory(configs);
 
     if (configs.shouldRunGetSpecWorkflows()) {
       registerGetSpec(factory);
@@ -380,7 +380,7 @@ public class WorkerApp {
       KubePortManagerSingleton.init(configs.getTemporalWorkerPorts());
     }
 
-    final WorkflowServiceStubs temporalService = TemporalUtils.createTemporalProductionService();
+    final WorkflowServiceStubs temporalService = TemporalUtils.createTemporalService();
 
     final Database configDatabase = new Database(configsDslContext);
     final FeatureFlags featureFlags = new EnvVariableFeatureFlags();
@@ -407,7 +407,7 @@ public class WorkerApp {
         configRepository,
         new OAuthConfigSupplier(configRepository, trackingClient));
 
-    final TemporalClient temporalClient = TemporalClient.production(configs);
+    final TemporalClient temporalClient = TemporalClient.get(configs);
 
     final TemporalWorkerRunFactory temporalWorkerRunFactory = new TemporalWorkerRunFactory(
         temporalClient,
