@@ -240,6 +240,13 @@ Returns the Temporal Image. TODO: This will probably be replaced if we move to u
 {{- end -}}
 
 {{/*
+Returns the container orchestrator Image.
+*/}}
+{{- define "airbyte.containerOrchestratorImage" -}}
+{{- include "common.images.image" (dict "imageRoot" .Values.common.orchestrator.image "global" .Values.global) -}}
+{{- end -}}
+
+{{/*
 Construct comma separated list of key/value pairs from object (useful for ENV var values)
 */}}
 {{- define "airbyte.flattenMap" -}}

@@ -111,7 +111,13 @@ spec:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: TEMPORAL_HOST
-        {{- if not .Values.common.orchestrator.enabled }}
+        {{- if .Values.common.orchestrator.enabled }}
+        - name: CONTAINER_ORCHESTRATOR_IMAGE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: CONTAINER_ORCHESTRATOR_IMAGE
+        {{- else }}
         - name: TEMPORAL_WORKER_PORTS
           valueFrom:
             configMapKeyRef:

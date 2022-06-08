@@ -53,7 +53,9 @@ data:
   S3_MINIO_ENDPOINT: {{ include "airbyte.minio.endpoint" . | quote }}
   S3_PATH_STYLE_ACCESS: {{ include "airbyte.s3PathStyleAccess" . | quote }}
   TEMPORAL_HOST: {{ include "common.names.fullname" . }}-temporal:{{ .Values.temporal.service.port }}
-  {{- if not .Values.common.orchestrator.enabled }}
+  {{- if .Values.common.orchestrator.enabled }}
+  CONTAINER_ORCHESTRATOR_IMAGE: {{ include "airbyte.containerOrchestratorImage" . }}
+  {{- else}}
   SUBMITTER_NUM_THREADS: {{ .Values.scheduler.submitterNumThreads | quote }}
   TEMPORAL_WORKER_PORTS: {{ include "temporal.worker.ports" . | quote }}
   {{- end}}
