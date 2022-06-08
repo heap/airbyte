@@ -8,7 +8,12 @@ global:
 ## @section Common Parameters
 common:
   orchestrator:
-    enabled: false
+    enabled: true
+    ## @param common.orchestrator.image.repository The repository to use for the airbyte container-orchestrator image.
+    ## @param common.orchestrator.image.tag The airbyte container-orchestrator image tag. Defaults to the chart's AppVersion
+    image:
+      repository: "airbyte/container-orchestrator"
+      tag: "0.39.0-alpha"
   stateStorage:
     type: "s3"
     s3:
