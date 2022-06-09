@@ -112,17 +112,13 @@ spec:
               name: {{ include "common.names.fullname" . }}-env
               key: TEMPORAL_HOST
         {{- if not .Values.common.orchestrator.enabled }}
-        - name: TEMPORAL_WORKER_PORTS
-          valueFrom:
-            configMapKeyRef:
-              name: {{ include "common.names.fullname" . }}-env
-              key: TEMPORAL_WORKER_PORTS
         - name: SUBMITTER_NUM_THREADS
           valueFrom:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: SUBMITTER_NUM_THREADS
         {{- end}}
+
         - name: LOG_LEVEL
           value: "{{ .Values.scheduler.log.level }}"
         - name: JOB_KUBE_NAMESPACE
@@ -232,6 +228,11 @@ spec:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: CONTAINER_ORCHESTRATOR_ENABLED
+        - name: TEMPORAL_WORKER_PORTS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: TEMPORAL_WORKER_PORTS
         - name: MAX_SYNC_WORKERS
           valueFrom:
             configMapKeyRef:

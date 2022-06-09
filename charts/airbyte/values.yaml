@@ -13,7 +13,7 @@ common:
     ## @param common.orchestrator.image.tag The airbyte container-orchestrator image tag. Defaults to the chart's AppVersion
     image:
       repository: "airbyte/container-orchestrator"
-      tag: "0.39.0-alpha"
+      tag: "0.39.9-alpha"
   stateStorage:
     type: "s3"
     s3:
@@ -62,7 +62,7 @@ webapp:
   image:
     repository: airbyte/webapp
     pullPolicy: IfNotPresent
-    tag: 0.39.0-alpha
+    tag: 0.39.9-alpha
 
   ## @param webapp.podAnnotations [object] Add extra annotations to the webapp pod(s)
   ##
@@ -239,7 +239,7 @@ metricsReporter:
   image:
     repository: airbyte/metrics-reporter
     pullPolicy: IfNotPresent
-    tag: 0.39.0-alpha
+    tag: 0.39.9-alpha
 
   ## @param metricsReporter.podAnnotations [object] Add extra annotations to the metricsReporter pod
   ##
@@ -364,7 +364,7 @@ scheduler:
   image:
     repository: airbyte/scheduler
     pullPolicy: IfNotPresent
-    tag: 0.39.0-alpha
+    tag: 0.39.9-alpha
 
   ## @param scheduler.submitterNumThreads Number number of threads to use for job submission
   ## controls how many jobs can be submitted in parallel, deprecated after 0.39.0
@@ -599,7 +599,7 @@ server:
   image:
     repository: airbyte/server
     pullPolicy: IfNotPresent
-    tag: 0.39.0-alpha
+    tag: 0.39.9-alpha
 
   ## @param server.podAnnotations [object] Add extra annotations to the server pod
   ##
@@ -726,7 +726,7 @@ worker:
   image:
     repository: airbyte/worker
     pullPolicy: IfNotPresent
-    tag: 0.39.0-alpha
+    tag: 0.39.9-alpha
 
   ## @param worker.podAnnotations [object] Add extra annotations to the worker pod(s)
   ##
@@ -859,7 +859,7 @@ bootloader:
   image:
     repository: airbyte/bootloader
     pullPolicy: IfNotPresent
-    tag: 0.39.0-alpha
+    tag: 0.39.9-alpha
 
   ## @param bootloader.podAnnotations [object] Add extra annotations to the bootloader pod
   ##

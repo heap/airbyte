@@ -57,7 +57,6 @@ data:
   CONTAINER_ORCHESTRATOR_IMAGE: {{ include "airbyte.containerOrchestratorImage" . }}
   {{- else}}
   SUBMITTER_NUM_THREADS: {{ .Values.scheduler.submitterNumThreads | quote }}
-  TEMPORAL_WORKER_PORTS: {{ include "temporal.worker.ports" . | quote }}
   {{- end}}
   TRACKING_STRATEGY: logging
   PAPERCUPS_STORYTIME: disabled
@@ -67,6 +66,7 @@ data:
   WORKSPACE_DOCKER_MOUNT: airbyte_workspace
   WORKSPACE_ROOT: /workspace
   CONTAINER_ORCHESTRATOR_ENABLED: {{ ternary "true" "false" .Values.common.orchestrator.enabled | default "true" | quote }}
+  TEMPORAL_WORKER_PORTS: {{ include "temporal.worker.ports" . | quote }}
   {{- if .Values.datadog.enabled }}
   DD_AGENT_HOST: "/var/run/datadog/dsd.socket"
   DD_DOGSTATSD_PORT: "0"
