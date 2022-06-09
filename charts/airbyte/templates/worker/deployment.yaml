@@ -118,11 +118,6 @@ spec:
               name: {{ include "common.names.fullname" . }}-env
               key: CONTAINER_ORCHESTRATOR_IMAGE
         {{- else }}
-        - name: TEMPORAL_WORKER_PORTS
-          valueFrom:
-            configMapKeyRef:
-              name: {{ include "common.names.fullname" . }}-env
-              key: TEMPORAL_WORKER_PORTS
         - name: SUBMITTER_NUM_THREADS
           valueFrom:
             configMapKeyRef:
@@ -313,6 +308,11 @@ spec:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: CONTAINER_ORCHESTRATOR_ENABLED
+        - name: TEMPORAL_WORKER_PORTS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: TEMPORAL_WORKER_PORTS
         - name: MAX_SYNC_WORKERS
           valueFrom:
             configMapKeyRef:
