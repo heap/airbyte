@@ -29,6 +29,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -157,6 +159,10 @@ public class EnvConfigs implements Configs {
   private static final String DEFAULT_JOB_KUBE_CURL_IMAGE = "curlimages/curl:7.83.1";
   private static final int DEFAULT_DATABASE_INITIALIZATION_TIMEOUT_MS = 60 * 1000;
 
+  private static final String VAULT_AUTH_METHOD = "VAULT_AUTH_METHOD";
+  private static final String VAULT_AWS_ROLE = "VAULT_AWS_ROLE";
+  private static final String VAULT_AWS_IDENTITY = "VAULT_AWS_IDENTITY";
+  private static final String VAULT_AWS_SIGNATURE = "VAULT_AWS_SIGNATURE";
   private static final String VAULT_ADDRESS = "VAULT_ADDRESS";
   private static final String VAULT_PREFIX = "VAULT_PREFIX";
 
@@ -329,6 +335,27 @@ public class EnvConfigs implements Configs {
   public SecretPersistenceType getSecretPersistenceType() {
     final var secretPersistenceStr = getEnvOrDefault(SECRET_PERSISTENCE, SecretPersistenceType.TESTING_CONFIG_DB_TABLE.name());
     return SecretPersistenceType.valueOf(secretPersistenceStr);
+  }
+
+  @Override
+  public VaultAuthMethod getVaultAuthMethod() {
+    val authMethod = getEnv(VAULT_AUTH_METHOD);
+    return VaultAuthMethod.valueOf(authMethod);
+  }
+
+  @Override
+  public String getVaultAWSRole() {
+    return getEnv(VAULT_AWS_ROLE);
+  }
+
+  @Override
+  public String getVaultAWSIdentity() {
+    return getEnv(VAULT_AWS_IDENTITY);
+  }
+
+  @Override
+  public String getVaultAWSSignature() {
+    return getEnv(VAULT_AWS_SIGNATURE);
   }
 
   @Override

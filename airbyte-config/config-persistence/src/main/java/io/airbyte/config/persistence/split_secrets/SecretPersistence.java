@@ -32,7 +32,7 @@ public interface SecretPersistence extends ReadOnlySecretPersistence {
         return Optional.of(GoogleSecretManagerPersistence.getLongLived(configs.getSecretStoreGcpProjectId(), configs.getSecretStoreGcpCredentials()));
       }
       case VAULT -> {
-        return Optional.of(new VaultSecretPersistence(configs.getVaultAddress(), configs.getVaultPrefix()));
+        return Optional.of(new VaultSecretPersistence(configs.getVaultAddress(), configs.getVaultPrefix(), configs.getVaultAuthMethod(), configs.getVaultAWSRole(), configs.getVaultAWSIdentity(), configs.getVaultAWSSignature()));
       }
       default -> {
         return Optional.empty();
@@ -60,7 +60,7 @@ public interface SecretPersistence extends ReadOnlySecretPersistence {
         return Optional.of(GoogleSecretManagerPersistence.getEphemeral(configs.getSecretStoreGcpProjectId(), configs.getSecretStoreGcpCredentials()));
       }
       case VAULT -> {
-        return Optional.of(new VaultSecretPersistence(configs.getVaultAddress(), configs.getVaultPrefix()));
+        return Optional.of(new VaultSecretPersistence(configs.getVaultAddress(), configs.getVaultPrefix(), configs.getVaultAuthMethod(), configs.getVaultAWSRole(), configs.getVaultAWSIdentity(), configs.getVaultAWSSignature()));
       }
       default -> {
         return Optional.empty();

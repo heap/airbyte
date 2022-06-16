@@ -109,6 +109,26 @@ public interface Configs {
   SecretPersistenceType getSecretPersistenceType();
 
   /**
+   * Define the vault authentication method
+   */
+   VaultAuthMethod getVaultAuthMethod();
+
+  /**
+   * Define the vault role for aws iam auth
+   */
+  String getVaultAWSRole();
+
+  /**
+   * Define the vault identity for aws iam auth
+   */
+  String getVaultAWSIdentity();
+
+  /**
+   * Define the vault signature for aws iam auth
+   */
+  String getVaultAWSSignature();
+
+  /**
    * Define the vault address to read/write Airbyte Configuration to Hashicorp Vault. Alpha Support.
    */
   String getVaultAddress();
@@ -548,6 +568,11 @@ public interface Configs {
     TESTING_CONFIG_DB_TABLE,
     GOOGLE_SECRET_MANAGER,
     VAULT
+  }
+
+  enum VaultAuthMethod {
+    TOKEN,
+    AWS_IAM
   }
 
 }

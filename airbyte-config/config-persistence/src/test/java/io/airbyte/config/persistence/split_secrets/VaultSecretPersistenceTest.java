@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.vault.VaultContainer;
 
+import static io.airbyte.config.Configs.VaultAuthMethod.TOKEN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -22,7 +23,7 @@ public class VaultSecretPersistenceTest {
 
     final var vaultAddress = "http://" + vaultContainer.getHost() + ":" + vaultContainer.getFirstMappedPort();
 
-    persistence = new VaultSecretPersistence(vaultAddress, "secret/testing", "vault-dev-token-id");
+    persistence = new VaultSecretPersistence(vaultAddress, "secret/testing", "vault-dev-token-id", TOKEN, null, null, null);
     baseCoordinate = "VaultSecretPersistenceIntegrationTest_coordinate_" + RandomUtils.nextInt() % 20000;
   }
 
