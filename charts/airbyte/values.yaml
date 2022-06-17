@@ -229,6 +229,13 @@ datadog:
       hostPath:
         path: /var/run/datadog/
 
+vault:
+  enabled: true
+  authMethod: "token"
+  address: "http://localhost:8200"
+  token: "top-secret"
+  prefix: "path/ending/with/slash/"
+
 metricsReporter:
   ## @param metricsReporter.replicaCount Number of metricsReporter replicas
   replicaCount: 1
@@ -469,7 +476,7 @@ server:
   image:
     repository: airbyte/server
     pullPolicy: IfNotPresent
-    tag: 0.39.20-alpha
+    tag: 0.39.20-stella
 
   ## @param server.podAnnotations [object] Add extra annotations to the server pod
   ##
@@ -596,7 +603,7 @@ worker:
   image:
     repository: airbyte/worker
     pullPolicy: IfNotPresent
-    tag: 0.39.20-alpha
+    tag: 0.39.20-stella
 
   ## @param worker.podAnnotations [object] Add extra annotations to the worker pod(s)
   ##

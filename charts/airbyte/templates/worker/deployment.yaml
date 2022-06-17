@@ -364,6 +364,28 @@ spec:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: MAX_DISCOVER_WORKERS
+        - name: SECRET_PERSISTENCE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: SECRET_PERSISTENCE
+        {{- if .Values.vault.enabled }}
+        - name: VAULT_ADDRESS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: VAULT_ADDRESS
+        - name: VAULT_TOKEN
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: VAULT_TOKEN
+        - name: VAULT_PREFIX
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "common.names.fullname" . }}-env
+              key: VAULT_PREFIX
+        {{- end }}
         {{- if .Values.worker.extraEnv }}
         {{ .Values.worker.extraEnv | toYaml | nindent 8 }}
         {{- end }}

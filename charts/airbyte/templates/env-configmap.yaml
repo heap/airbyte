@@ -85,3 +85,12 @@ data:
   MAX_SPEC_WORKERS: {{ .Values.worker.max.spec | quote }}
   MAX_CHECK_WORKERS: {{ .Values.worker.max.check | quote }}
   MAX_DISCOVER_WORKERS: {{ .Values.worker.max.discover | quote }}
+  {{- if .Values.vault.enabled }}
+  SECRET_PERSISTENCE: "VAULT"
+  VAULT_ADDRESS: {{ .Values.vault.address | quote }}
+  VAULT_TOKEN: {{ .Values.vault.token | quote }}
+  VAULT_PREFIX: {{ .Values.vault.prefix | quote }}
+  VAULT_AUTH_METHOD: {{ .Values.vault.authMethod | quote }}
+  {{- else }}
+  SECRET_PERSISTENCE: "TESTING_CONFIG_DB_TABLE"
+  {{- end }}
