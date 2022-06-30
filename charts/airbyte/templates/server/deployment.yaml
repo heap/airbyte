@@ -247,11 +247,11 @@ spec:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
               key: VAULT_ADDRESS
-        - name: VAULT_TOKEN
+        - name: VAULT_AUTH_TOKEN
           valueFrom:
             configMapKeyRef:
               name: {{ include "common.names.fullname" . }}-env
-              key: VAULT_TOKEN
+              key: VAULT_AUTH_TOKEN
         - name: VAULT_PREFIX
           valueFrom:
             configMapKeyRef:
