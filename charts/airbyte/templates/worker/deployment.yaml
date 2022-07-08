@@ -378,7 +378,7 @@ spec:
         - name: VAULT_AUTH_TOKEN
           valueFrom:
             secretKeyRef:
-              name: {{ include "common.names.fullname" . }}-env
+              name: {{ include "common.names.fullname" . }}-secrets
               key: VAULT_AUTH_TOKEN
         - name: VAULT_PREFIX
           valueFrom:
