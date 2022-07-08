@@ -88,7 +88,6 @@ data:
   {{- if .Values.vault.enabled }}
   SECRET_PERSISTENCE: "VAULT"
   VAULT_ADDRESS: {{ .Values.vault.address | quote }}
-  VAULT_AUTH_TOKEN: {{ .Values.vault.token | quote }}
   VAULT_PREFIX: {{ .Values.vault.prefix | quote }}
   VAULT_AUTH_METHOD: {{ .Values.vault.authMethod | quote }}
   {{- else }}
